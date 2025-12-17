@@ -1,0 +1,53 @@
+ 
+1. Parallel Retrieval
+• 	Approach:
+• 	Run multiple queries simultaneously across sources (LinkedIn, GitHub Pages, Vercel, Netlify, AWS S3, portfolio sites).
+• 	Use proxy rotation/IP rotation to bypass rate limits.
+1. Search Query Construction
+• 	Boolean queries to surface resumes or portfolios:
+site:linkedin.com ("resume" OR "cv") ("kotlin" OR "java") Kafka Canada
+site:vercel.app ("resume" OR "cv") ("kotlin" OR "java") Kafka Canada
+site:netlify.app ("resume" OR "cv") ("kotlin" OR "java") Kafka Canada
+site:github.io ("resume" OR "cv") ("kotlin" OR "java") Kafka Canada
+site:s3.amazonaws.com ("resume" OR "cv") ("kotlin" OR "java") Kafka Canada
+Multiple queries are needed because portfolios are hosted across different surfaces.
+
+• 	Output: Raw PDFs, HTML, DOCX, Markdown files stored with metadata.
+• 	Before scraping, check the cache.
+• 	If the portfolio hasn’t changed (same hash/timestamp), skip re-scraping.
+• 	If it’s updated, scrape again and refresh the cache.
+2. Parsing Content
+• 	Text Extraction:
+• 	HTML → BeautifulSoup/Cheerio
+• 	PDF → pdfminer.six/PyPDF2
+• 	DOCX/Markdown → specialized parsers
+• 	Entity Extraction:
+• 	Regex for emails, phone numbers, LinkedIn/GitHub URLs.
+• 	NLP (spaCy, transformers, NLTK) for names, companies, skills, job titles, locations.
+• 	Enhancement: Combine resume text + portfolio text into one candidate profile.
+
+3. Data Structuring & Normalization
+• 	Canonical Fields: Name, Skills, Email, LinkedIn URL, Portfolio URL, Location.
+• 	Normalization:
+• 	Skills → controlled vocabulary (“JS” → “JavaScript”).
+• 	Locations → standardized (“Toronto, ON” → “Toronto, Canada”).
+• 	Titles → mapped to taxonomy.
+• 	Storage: Relational DB (PostgreSQL) with candidate rows; hash maps for skill lookups.
+
+4. Deduplication & Identity Resolution
+• 	Primary Identifier: Email address.
+• 	Secondary Identifiers: LinkedIn URL, GitHub handle, portfolio domain.
+• 	Techniques:
+• 	Hash resume/portfolio text to detect identical files.
+• 	Fuzzy matching (Levenshtein, cosine similarity) for near-duplicates.
+• 	Graph traversal: candidates ↔ skills ↔ jobs to merge records more reliably.
+
+
+6. Pipeline Integration
+• 	Exports:
+• 	CSV for lightweight sharing.
+• 	Airtable/CRM via API for recruiter workflows.
+• 	Automation:
+• 	Scheduled scraping jobs keep dataset fresh.
+• 	Error handling/logging for failed downloads or parsing errors.
+• 	Result: A structured, deduplicated, ranked candidate database enriched with graph-based insights.

@@ -1,6 +1,9 @@
 {
   "devDependencies": {
-    "@types/node": "^25.0.3"
+    "@types/node": "^25.0.3",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.9.3"
   },
   "name": "recruiterleadgen",
   "version": "1.0.0",
@@ -10,7 +13,10 @@
     "doc": "docs"
   },
   "dependencies": {
-    "undici-types": "^7.16.0"
+    "axios": "^1.13.2",
+    "node-fetch": "^3.3.2",
+    "undici-types": "^7.16.0",
+    "winston": "^3.19.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

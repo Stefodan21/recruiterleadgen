@@ -1,5 +1,29 @@
 {
   "devDependencies": {
     "@types/node": "^25.0.3"
-  }
+  },
+  "name": "recruiterleadgen",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "dependencies": {
+    "undici-types": "^7.16.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Stefodan21/recruiterleadgen.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Stefodan21/recruiterleadgen/issues"
+  },
+  "homepage": "https://github.com/Stefodan21/recruiterleadgen#readme"
 }

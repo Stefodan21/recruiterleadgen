@@ -1,5 +1,4 @@
 // main.ts
-import { buildAllQueries } from "./bool_query";
 import { runCrawler } from "./crawler";
 import { collectLinks } from "./link_collector";
 

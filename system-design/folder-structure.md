@@ -50,18 +50,10 @@ recruiterleadgen/
 │   │                             # 1. Run ./fetch_codebase (Go)
 │   │                             # 2. Run ./discover_profiles (Go)
 │   │                             # 3. Run ./extract_content (Rust)
-│   │                             # 4. Run ./deduplicate (Rust, parallel hashing)
-│   │                             # Produces unique_profiles.json
 │   │
 │   ├── go.mod                    # Go module definition for dependencies (net/http, os, archive/zip, encoding/json)
 │   │
 │   ├── Cargo.toml                # Rust crate definition for dependencies (regex, serde_json, sha2, blake3, rayon)
-│   │
-│   └── deduplicate.rs            # Rust → deduplication stage
-│                                 # CPU-heavy: optimized hashing + parallel comparison
-│                                 # Uses rayon for parallel hashing across CPU cores
-│                                 # Hashes normalized profiles, collapses duplicates
-│                                 # Outputs unique_profiles.json
 │
 │
 ├── field_extraction/             # Step 4: Pull structured candidate fields

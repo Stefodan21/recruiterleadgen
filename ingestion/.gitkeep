@@ -1,0 +1,33 @@
+I can generate:
+🔹 discover_profiles.go
+
+Scan the downloaded repos/sites for:
+
+    resume.pdf
+
+    resume.docx
+
+    README.md
+
+    /public/
+
+    /docs/
+
+    /about/
+
+    /cv/
+
+🔹 extract_content.rs
+
+Rust parser for HTML/PDF/DOCX.
+🔹 deduplicate.rs
+
+Rust hashing + graph merge.
+🔹 Full multi‑stage Dockerfile
+
+Go → Rust → final slim image.
+🔹 entrypoint.sh
+
+Orchestration script.
+
+Just tell me which file you want next.

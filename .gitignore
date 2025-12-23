@@ -1,0 +1,32 @@
+# Node modules (never commit)
+node_modules/
+
+# TypeScript build output
+dist/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor junk
+.vscode/
+.idea/
+
+# Optional: ignore compiled TS build cache
+*.tsbuildinfo
+
+# Docker
+# (You don't need to ignore Dockerfile — keep it in repo)
+docker-compose.override.yml

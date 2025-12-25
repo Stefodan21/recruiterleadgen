@@ -44,17 +44,13 @@ recruiterleadgen/
 │   │                             # 1. Build Go binaries (fetch_codebase, discover_profiles)
 │   │                             # 2. Build Rust binaries (extract_content, deduplicate)
 │   │                             # 3. Copy all binaries into final slim image
-│   │                             # Final container runs Go for retrieval, then Rust for parsing/deduplication
-│   │
+│   │                             # Final container runs Go for retrieval, then Rust for parsing│   │
 │   ├── entrypoint.sh             # Orchestration script:
 │   │                             # 1. Run ./fetch_codebase (Go)
 │   │                             # 2. Run ./discover_profiles (Go)
 │   │                             # 3. Run ./extract_content (Rust)
 │   │
-│   ├── go.mod                    # Go module definition for dependencies (net/http, os, archive/zip, encoding/json)
-│   │
-│   ├── Cargo.toml                # Rust crate definition for dependencies (regex, serde_json, sha2, blake3, rayon)
-│
+│   ├── go.mod                    # Go module definition for dependencies (net/http, os, archive/zip, encoding/json│
 │
 ├── field_extraction/             # Step 4: Pull structured candidate fields
 │   ├── extract_contact.rs        # Rust → regex-based extraction: LinkedIn, GitHub, email, phone

@@ -1,0 +1,19 @@
+{
+  "name": "export-stage",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "csv": "ts-node to_csv.ts",
+    "db": "ts-node to_db.ts",
+    "airtable": "ts-node to_airtable.ts"
+  },
+  "dependencies": {
+    "airtable": "^0.12.2",
+    "csv-writer": "^1.6.0",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

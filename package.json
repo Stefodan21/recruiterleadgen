@@ -13,6 +13,7 @@
     "doc": "docs"
   },
   "dependencies": {
+    "airtable": "^0.12.2",
     "axios": "^1.13.2",
     "node-fetch": "^3.3.2",
     "undici-types": "^7.16.0",

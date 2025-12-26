@@ -95,9 +95,10 @@ jobs:
 
             - name: Build export image
               run: docker build -t export ./export
-            - name: Run export
+            - name: Export to Supabase
               run: |
                 docker run --rm \
                   -v ${{ github.workspace }}:/app \
-                  -e POSTGRES_URL=${{ secrets.POSTGRES_URL }} \
+                  -e SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
+                  -e SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }} \
                   export ts-node to_db.ts

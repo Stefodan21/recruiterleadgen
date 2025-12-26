@@ -8,9 +8,9 @@
     "airtable": "ts-node to_airtable.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
     "airtable": "^0.12.2",
-    "csv-writer": "^1.6.0",
-    "pg": "^8.11.3"
+    "csv-writer": "^1.6.0"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",

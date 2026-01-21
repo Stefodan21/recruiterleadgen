@@ -2,7 +2,8 @@
 import fs from "fs";
 import path from "path";
 
-const MAX_PER_HOST = 10;
+// No per-host cap; emit everything we find.
+const MAX_PER_HOST = Infinity;
 
 // ---------------------------------------------
 // Load persistent seen URLs
@@ -34,8 +35,19 @@ function saveSeen(seen: Set<string>) {
 // Local helpers
 // ---------------------------------------------
 function extractUrls(data: any): string[] {
-  if (!data || !Array.isArray(data.results)) return [];
-  return data.results.map(r => r.url).filter(Boolean);
+  if (!data) return [];
+
+  const urls: string[] = [];
+
+  if (Array.isArray((data as any).results)) {
+    urls.push(...(data as any).results.map((r: any) => r.url || r.link).filter(Boolean));
+  }
+
+  if (Array.isArray((data as any).items)) {
+    urls.push(...(data as any).items.map((r: any) => r.link || r.url).filter(Boolean));
+  }
+
+  return urls;
 }
 
 function normalizeUrl(url: string): string | null {
@@ -69,12 +81,12 @@ function boisFilter(url: string): boolean {
 // ---------------------------------------------
 // MAIN FUNCTION — persistent dedupe
 // ---------------------------------------------
-export function collectLinks(results: Array<{ query: string; data: any }>) {
+export function collectLinks(output: any) {
   const seen = loadSeen(); // persistent dedupe memory
   const freshLinks: string[] = [];
 
-  for (const { data } of results) {
-    const urls = extractUrls(data);
+  for (const entry of output) {
+    const urls = extractUrls(entry);
 
     const cleaned = urls
       .map(normalizeUrl)

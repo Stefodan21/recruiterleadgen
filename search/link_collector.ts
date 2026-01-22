@@ -63,6 +63,7 @@ function normalizeUrl(url: string): string | null {
 function boisFilter(url: string): boolean {
   const BLOCKED = [
     "wix.com",
+    "jobs",
     "wordpress.com",
     "blogspot.com",
     "medium.com",

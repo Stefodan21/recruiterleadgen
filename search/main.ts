@@ -5,9 +5,9 @@ import { collectLinks } from "./link_collector";
 async function main() {
   // 1. Define your search input
   const input = {
-    role: "software engineer",
-    location: "remote",
-    skills: ["typescript", "react"]
+    role: ["software engineer", "developer", "full stack", "frontend", "backend"],
+    location: ["florida", "miami"],
+    skills: ["typescript", "react", "HTML", "CSS", "node.js"]
   };
 
   // 2. Run crawler on all queries

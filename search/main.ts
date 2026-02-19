@@ -10,6 +10,8 @@ async function main() {
     skills: ["typescript", "react", "HTML", "CSS", "node.js"]
   };
 
+  
+
   // 2. Run crawler on all queries
   const crawlerResults = await runCrawler(input);
 

@@ -1,26 +1,45 @@
 // link_collector.ts
 import fs from "fs";
-import path from "path";
+import {
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+  S3ServiceException,
+} from "@aws-sdk/client-s3";
+
 
 // No per-host cap; emit everything we find.
 const MAX_PER_HOST = Infinity;
+const s3accesskeyid = process.env.S3_ACCESS_KEY_ID;
+const s3secretaccesskey = process.env.S3_SECRET_ACCESS_KEY;
+
+const client = new S3Client({
+  forcePathStyle: true,
+  region: 'us-east-1',
+  endpoint: 'https://iijngbyiamyqmsgylgui.storage.supabase.co/storage/v1/s3',
+  credentials: {
+    accessKeyId: s3accesskeyid,
+    secretAccessKey: s3secretaccesskey,
+  }
+})
+
+
+interface S3Object {
+  Bucket: string;
+  Key: string;
+}
 
 // ---------------------------------------------
-// Load persistent seen URLs
+// Load persistent seen URLs from S3
 // ---------------------------------------------
-function loadSeen(): Set<string> {
-  const file = path.join(__dirname, "profile_links.json");
+async function loadSeen( s3Object: S3Object) {
+ 
+    const response = await client.send(
+      new GetObjectCommand({
+        Bucket: seen.Bucket,
+        Key: key,
+      })
 
-  if (!fs.existsSync(file)) {
-    return new Set();
-  }
-
-  try {
-    const data = JSON.parse(fs.readFileSync(file, "utf8"));
-    return new Set(data);
-  } catch {
-    return new Set();
-  }
 }
 
 // ---------------------------------------------
@@ -63,6 +82,8 @@ function normalizeUrl(url: string): string | null {
 function boisFilter(url: string): boolean {
   const BLOCKED = [
     "wix.com",
+    "arc.dev",
+    "hire",
     "jobs",
     "wordpress.com",
     "blogspot.com",

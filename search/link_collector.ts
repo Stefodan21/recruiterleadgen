@@ -1,5 +1,6 @@
 // link_collector.ts
 import fs from "fs";
+import path from "path";
 import {
   GetObjectCommand,
   PutObjectCommand,
@@ -12,15 +13,21 @@ import {
 const MAX_PER_HOST = Infinity;
 const s3accesskeyid = process.env.S3_ACCESS_KEY_ID;
 const s3secretaccesskey = process.env.S3_SECRET_ACCESS_KEY;
+const s3SeenBucket = process.env.S3_SEEN_BUCKET;
+const s3SeenKey = process.env.S3_SEEN_KEY ?? "profile_links.json";
+
+const canUseS3 = Boolean(s3accesskeyid && s3secretaccesskey && s3SeenBucket);
 
 const client = new S3Client({
   forcePathStyle: true,
   region: 'us-east-1',
   endpoint: 'https://iijngbyiamyqmsgylgui.storage.supabase.co/storage/v1/s3',
-  credentials: {
-    accessKeyId: s3accesskeyid,
-    secretAccessKey: s3secretaccesskey,
-  }
+  credentials: s3accesskeyid && s3secretaccesskey
+    ? {
+        accessKeyId: s3accesskeyid,
+        secretAccessKey: s3secretaccesskey,
+      }
+    : undefined,
 })
 
 
@@ -29,25 +36,69 @@ interface S3Object {
   Key: string;
 }
 
+const seenObject: S3Object | null = s3SeenBucket
+  ? {
+      Bucket: s3SeenBucket,
+      Key: s3SeenKey,
+    }
+  : null;
+
 // ---------------------------------------------
 // Load persistent seen URLs from S3
 // ---------------------------------------------
-async function loadSeen( s3Object: S3Object) {
- 
+async function loadSeen(s3Object: S3Object | null): Promise<Set<string>> {
+  if (!canUseS3 || !s3Object) {
+    throw new Error("S3 seen-link storage is required. Set S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY, and S3_SEEN_BUCKET.");
+  }
+
+  try {
     const response = await client.send(
       new GetObjectCommand({
-        Bucket: seen.Bucket,
-        Key: key,
+        Bucket: s3Object.Bucket,
+        Key: s3Object.Key,
       })
+    );
 
+    const body = await response.Body?.transformToString();
+    if (!body) {
+      return new Set<string>();
+    }
+
+    const parsed = JSON.parse(body);
+    if (!Array.isArray(parsed)) {
+      return new Set<string>();
+    }
+
+    return new Set<string>(parsed.filter((item): item is string => typeof item === "string"));
+  } catch (error) {
+    if (error instanceof S3ServiceException && error.name === "NoSuchKey") {
+      return new Set<string>();
+    }
+
+    throw new Error(`Failed to load seen links from S3: ${error instanceof Error ? error.message : "unknown error"}`);
+  }
 }
 
 // ---------------------------------------------
 // Save updated seen URLs
 // ---------------------------------------------
-function saveSeen(seen: Set<string>) {
-  const file = path.join(__dirname, "profile_links.json");
-  fs.writeFileSync(file, JSON.stringify([...seen], null, 2));
+async function saveSeen(seen: Set<string>, s3Object: S3Object | null): Promise<void> {
+  if (!canUseS3 || !s3Object) {
+    throw new Error("S3 seen-link storage is required. Set S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY, and S3_SEEN_BUCKET.");
+  }
+
+  try {
+    await client.send(
+      new PutObjectCommand({
+        Bucket: s3Object.Bucket,
+        Key: s3Object.Key,
+        Body: JSON.stringify([...seen]),
+        ContentType: "application/json",
+      })
+    );
+  } catch (error) {
+    throw new Error(`Failed to save seen links to S3: ${error instanceof Error ? error.message : "unknown error"}`);
+  }
 }
 
 // ---------------------------------------------
@@ -103,11 +154,12 @@ function boisFilter(url: string): boolean {
 // ---------------------------------------------
 // MAIN FUNCTION — persistent dedupe
 // ---------------------------------------------
-export function collectLinks(output: any) {
-  const seen = loadSeen(); // persistent dedupe memory
+export async function collectLinks(output: any): Promise<string[]> {
+  const seen = await loadSeen(seenObject); // persistent dedupe memory
   const freshLinks: string[] = [];
+  const entries = Array.isArray(output) ? output : [output];
 
-  for (const entry of output) {
+  for (const entry of entries) {
     const urls = extractUrls(entry);
 
     const cleaned = urls
@@ -127,7 +179,7 @@ export function collectLinks(output: any) {
   }
 
   // Save updated seen list
-  saveSeen(seen);
+  await saveSeen(seen, seenObject);
 
   // Write artifact for ingestion
   fs.writeFileSync(

@@ -16,7 +16,7 @@ async function main() {
   const crawlerResults = await runCrawler(input);
 
   // 3. Collect + dedupe + persist + output new links
-  const newLinks = collectLinks(crawlerResults);
+  const newLinks = await collectLinks(crawlerResults);
 
   console.log("New links collected:", newLinks.length);
 }

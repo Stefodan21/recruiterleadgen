@@ -10,11 +10,13 @@ async function main() {
     skills: ["typescript", "react", "HTML", "CSS", "node.js"]
   };
 
+  
+
   // 2. Run crawler on all queries
   const crawlerResults = await runCrawler(input);
   
   // 3. Collect + dedupe + persist + output new links
-  const newLinks = collectLinks(crawlerResults);
+  const newLinks = await collectLinks(crawlerResults);
 
   console.log("New links collected:", newLinks.length);
 }

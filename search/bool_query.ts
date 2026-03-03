@@ -14,7 +14,7 @@ const highSignalSites = [
   "vercel.app",
   "netlify.app",
   "github.io",
-  "gitlab.io",
+  // "gitlab.io",
   "pages.dev",
   "web.app",
   "firebaseapp.com",

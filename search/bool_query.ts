@@ -2,9 +2,9 @@
 // Types
 // -----------------------------
 export interface QueryInput {
-  role: string;
+  role: string[];
   skills: string[];
-  location: string;
+  location: string[];
 }
 
 // -----------------------------

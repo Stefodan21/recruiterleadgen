@@ -7,6 +7,7 @@ import {
   S3Client,
   S3ServiceException,
 } from "@aws-sdk/client-s3";
+import { requestTimeout } from "airtable";
 
 
 // No per-host cap; emit everything we find.
@@ -28,7 +29,10 @@ const client = new S3Client({
         secretAccessKey: s3secretaccesskey,
       }
     : undefined,
-})
+  requestHandler: {
+    requestTimeout: 30000, // 30 seconds
+  },
+});
 
 
 interface S3Object {

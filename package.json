@@ -13,6 +13,8 @@
     "doc": "docs"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.888.0",
+    "@smithy/node-http-handler": "^4.0.0",
     "airtable": "^0.12.2",
     "axios": "^1.13.2",
     "node-fetch": "^3.3.2",

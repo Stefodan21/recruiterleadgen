@@ -17,26 +17,31 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build search image
-        run: docker build -t search -f search/Dockerfile search
+        run: docker build --no-cache -t search -f search/Dockerfile search
 
       - name: list image
         run: docker image list
      
       - name: Run search
         run: >-
-          docker run --rm
-          -e GOOGLE_KEY='${{ secrets.GOOGLE_KEY }}' 
-          -e CX_ID='${{ secrets.CX_ID }}' 
-          -e S3_ACCESS_KEY_ID='${{ secrets.S3_ACCESS_KEY_ID }}' 
-          -e S3_SECRET_ACCESS_KEY='${{ secrets.S3_SECRET_ACCESS_KEY }}' 
+          docker run --name search-run
+          -e GOOGLE_KEY='${{ secrets.GOOGLE_KEY }}'
+          -e CX_ID='${{ secrets.CX_ID }}'
+          -e S3_ACCESS_KEY_ID='${{ secrets.S3_ACCESS_KEY_ID }}'
+          -e S3_SECRET_ACCESS_KEY='${{ secrets.S3_SECRET_ACCESS_KEY }}'
           -e S3_SEEN_BUCKET='${{ secrets.S3_SEEN_BUCKET }}'
-          -v $GITHUB_WORKSPACE/search:/app
           search:latest
+
+      - name: Copy new_links.json from container
+        run: docker cp search-run:/app/new_links.json ./new_links.json
+
+      - name: Remove search container
+        run: docker rm search-run
 
       - uses: actions/upload-artifact@v4
         with:
           name: new_links
-          path: .
+          path: new_links.json
 
 
   ingestion:

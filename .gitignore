@@ -1,5 +1,5 @@
 # Node modules (never commit)
-node_modules/
+node_modules
 
 # TypeScript build output
 dist/

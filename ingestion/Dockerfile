@@ -16,17 +16,16 @@ RUN go build -o discover_profiles discover_profiles.go
 
 
 # -----------------------------
-# Stage 2 — Build Rust binaries
+# Stage 2 — Build Rust binary
 # -----------------------------
 FROM rust:1.75-bookworm AS rust-builder
 
 WORKDIR /app
 
-# Copy Rust extractor
-COPY extract_content.rs .
+COPY Cargo.toml .
+COPY main.rs .
 
-# Build Rust binary
-RUN rustc extract_content.rs -o extract_content
+RUN cargo build --release
 
 
 # -----------------------------
@@ -46,7 +45,15 @@ COPY --from=go-builder /app/fetch_codebase .
 COPY --from=go-builder /app/discover_profiles .
 
 # Copy Rust binary
-COPY --from=rust-builder /app/extract_content .
+COPY --from=rust-builder /app/target/release/extract_content .
+
+# Install Node.js for fetch_links.ts
+RUN apt-get update && apt-get install -y nodejs npm && rm -rf /var/lib/apt/lists/*
+
+# Copy Node app
+COPY package.json package-lock.json* ./
+RUN npm install --production=false
+COPY fetch_links.ts tsconfig.json ./
 
 # Copy entrypoint
 COPY entrypoint.sh .

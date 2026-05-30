@@ -18,7 +18,7 @@ recruiterleadgen/
 │   │                             # Deduplicates + normalizes results, outputs profile_links.json
 │   │                             # Output: profile_links.json (artifact for ingestion stage)
 │   │
-│   ├── Dockerfile                # Base: node:20-alpine → lightweight Node.js runtime → stable networking, SSL/DNS
+│   ├── Dockerfile                # Base: node:22-alpine → lightweight Node.js runtime → stable networking, SSL/DNS
 │   │                             # Workload: network-heavy, CPU-light
 │   │                             
 │   └── package.json              # Dependencies: axios, node-fetch, typescript, ts-node, logging libs
@@ -26,31 +26,12 @@ recruiterleadgen/
 │
 │
 ├── ingestion/
-│   ├── fetch_codebase.go         # Go → clone repos / download site bundles (zip/tar/html)
-│   │                             # Handles retrieval: network + disk I/O heavy
-│   │                             # Uses goroutines for concurrent downloads
-│   │
-│   ├── discover_profiles.go      # Go → locate candidate files (resume.*, README.*, about.*, /public/, /docs/)
-│   │                             # Scans repo/file structures to identify potential resume/profile sources
-│   │                             # Outputs list of raw files for parsing
-│   │
-│   ├── extract_content.rs        # Rust → parse HTML/DOCX/PDF into normalized text blobs
-│   │                             # Regex + text cleaning, memory-safe normalization
-│   │                             # Converts raw files into structured text
-│   │                             # Outputs raw_profiles.json
-│   │
-│   ├── Dockerfile                # Multi-stage build:
-│   │                             # Base: Debian Bookworm Slim
-│   │                             # 1. Build Go binaries (fetch_codebase, discover_profiles)
-│   │                             # 2. Build Rust binaries (extract_content, deduplicate)
-│   │                             # 3. Copy all binaries into final slim image
-│   │                             # Final container runs Go for retrieval, then Rust for parsing│   │
-│   ├── entrypoint.sh             # Orchestration script:
-│   │                             # 1. Run ./fetch_codebase (Go)
-│   │                             # 2. Run ./discover_profiles (Go)
-│   │                             # 3. Run ./extract_content (Rust)
-│   │
-│   ├── go.mod                    # Go module definition for dependencies (net/http, os, archive/zip, encoding/json│
+│   ├── fetch_links.ts        # GET portfolio pages, detect resume links, GET PDFs/DOCX
+│   ├── extract_content.rs    # Normalize HTML/PDF/DOCX into text
+│   ├── Dockerfile            # Build Node.js + Rust binaries
+│   ├── entrypoint.sh         # Run ts-node fetch_links → ./extract_content
+│   └── package.json          # Dependencies: axios, cheerio, pdf-parse
+│   └── go.mod
 │
 ├── field_extraction/             # Step 4: Pull structured candidate fields
 │   ├── extract_contact.rs        # Rust → regex-based extraction: LinkedIn, GitHub, email, phone

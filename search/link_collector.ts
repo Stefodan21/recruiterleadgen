@@ -169,8 +169,8 @@ export async function collectLinks(output: any): Promise<string[]> {
 
     const cleaned = urls
       .map(normalizeUrl)
-      .filter(Boolean)
-      .filter(url => boisFilter(url as string));
+      .filter((url): url is string => url !== null)
+      .filter(boisFilter);
 
     const unique = Array.from(new Set(cleaned));
     const limited = unique.slice(0, MAX_PER_HOST);

@@ -5,9 +5,9 @@
     "start": "ts-node main.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.923.0",
-    "axios": "^1.6.0",
-    "@smithy/node-http-handler": "^4.0.0"
+    "@aws-sdk/client-s3": "^3.1057.0",
+    "@smithy/node-http-handler": "^4.7.5",
+    "axios": "^1.6.0"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",

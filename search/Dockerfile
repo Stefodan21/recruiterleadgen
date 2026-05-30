@@ -14,4 +14,5 @@ COPY . .
 
 ENTRYPOINT []
 
-CMD ["npx", "ts-node", "main.ts"]
+CMD ["npm", "run", "start"]
+

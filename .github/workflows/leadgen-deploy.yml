@@ -18,9 +18,6 @@ jobs:
 
       - name: Build search image
         run: docker build --no-cache -t search -f search/Dockerfile search
-
-      - name: list image
-        run: docker image list
      
       - name: Run search
         run: >-
@@ -57,14 +54,38 @@ jobs:
           path: .
 
       - name: Build ingestion image
-        run: docker build -t ingestion ./ingestion
+        run: >-
+          docker build 
+          -t ingestion 
+          -f ingestion/Dockerfile ingestion
 
-      - name: Run ingestion
-        run: docker run --rm -v ${{ github.workspace }}:/app ingestion
+      - name: list image
+        run: docker image list
+
+      - name: Create ingestion container
+        run: docker create --name ingestion-run ingestion:latest
+
+      - name: Copy new_links.json into container
+        run: >-
+          docker cp ./new_links.json 
+          ingestion-run:/app/new_links.json
+
+      - name: Run ingestion container
+        run: docker start -a ingestion-run
+
+      - name: Copy raw_profiles.json from container
+        run: >-
+          docker cp ingestion-run:/app/raw_profiles.json
+          ./raw_profiles.json
+
+      - name: Remove ingestion container
+        run: docker rm ingestion-run
+
+
       - uses: actions/upload-artifact@v4
         with:
           name: raw_profiles
-          path: .
+          path: raw_profiles.json
 
   field_extraction:
     needs: ingestion
@@ -83,13 +104,13 @@ jobs:
 
           # FIXED: explicitly run the Rust binaries
       - name: Run extract_contact
-        run: |
-          docker run --rm -i field-extraction \
+        run: >-
+          docker run --rm -i field-extraction 
           extract_contact < raw_profiles.json > contact_fields.json
 
       - name: Run map_fields
-        run: |
-          docker run --rm -i field-extraction \
+        run: >-
+          docker run --rm -i field-extraction
           map_fields < contact_fields.json > extracted_fields.json
 
       - uses: actions/upload-artifact@v4

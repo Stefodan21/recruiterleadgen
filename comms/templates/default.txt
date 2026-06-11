@@ -1,0 +1,6 @@
+Hi {{name}},
+
+I came across your work and think you could be a great fit for a role I'm recruiting for. Would you be open to a quick chat?
+
+Best,
+{{senderName}}

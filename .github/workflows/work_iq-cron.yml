@@ -1,0 +1,38 @@
+name: work-iq-cron
+
+on:
+  schedule:
+    - cron: '0 * * * *' # every hour at minute 0
+  workflow_dispatch:
+
+concurrency:
+  group: work-iq-cron
+  cancel-in-progress: true
+
+jobs:
+  work_iq:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build work_iq image
+        run: docker build -t work_iq -f work_iq/Dockerfile work_iq
+
+      - name: Create work_iq container
+        run: >-
+          docker create --name workiq-run
+          -e MSAL_CLIENT_ID='${{ secrets.MSAL_CLIENT_ID }}'
+          -e MSAL_TENANT_ID='${{ secrets.MSAL_TENANT_ID }}'
+          -e MSAL_CLIENT_SECRET='${{ secrets.MSAL_CLIENT_SECRET }}'
+          -e RECRUITER_EMAIL='${{ secrets.RECRUITER_EMAIL }}'
+          -e SUPABASE_URL='${{ secrets.SUPABASE_URL }}'
+          -e SUPABASE_KEY='${{ secrets.SUPABASE_KEY }}'
+          work_iq
+
+      - name: Run work_iq checks
+        run: docker start -a workiq-run
+
+      - name: Remove work_iq container
+        run: docker rm workiq-run || true

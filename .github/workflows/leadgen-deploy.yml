@@ -1,13 +1,13 @@
 name: leadgen-deploy
 
 on:
-    workflow_dispatch:
-    pull_request:
-        branches: ['prod']
+  workflow_dispatch:
+  pull_request:
+    branches: ['prod']
 
 concurrency:
-    group: leadgen-deploy
-    cancel-in-progress: true
+  group: leadgen-deploy
+  cancel-in-progress: true
 
 jobs:
   search:
@@ -17,19 +17,16 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build search image
-        run: docker build --no-cache -t search -f search/Dockerfile search
+        run: docker build --no-cache -t search -f backend/Dockerfile search
      
       - name: Run search
         run: >-
           docker run --name search-run
           -e GOOGLE_KEY='${{ secrets.GOOGLE_KEY }}'
           -e CX_ID='${{ secrets.CX_ID }}'
-          -e S3_ACCESS_KEY_ID='${{ secrets.S3_ACCESS_KEY_ID }}'
-          -e S3_SECRET_ACCESS_KEY='${{ secrets.S3_SECRET_ACCESS_KEY }}'
-          -e S3_SEEN_BUCKET='${{ secrets.S3_SEEN_BUCKET }}'
           search:latest
 
-      - name: Copy new_links.json from container
+      - name: Copy search results
         run: docker cp search-run:/app/new_links.json ./new_links.json
 
       - name: Remove search container
@@ -37,105 +34,79 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: new_links
-          path: new_links.json
+          name: search-results
+          path: ./new_links.json
 
-
-  ingestion:
+  foundry:
     needs: search
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/download-artifact@v4
         with:
-          name: new_links
+          name: search-results
           path: .
 
-      - name: Build ingestion image
+      - name: Build foundry image
+        run: docker build -t foundry -f iq_layers/Dockerfile iq_layers
+
+      - name: Create foundry container
         run: >-
-          docker build 
-          -t ingestion 
-          -f ingestion/Dockerfile ingestion
+          docker create --name foundry-run
+          -e AZURE_FOUNDRY_ENDPOINT='${{ secrets.AZURE_FOUNDRY_ENDPOINT }}'
+          -e AZURE_FOUNDRY_KEY='${{ secrets.AZURE_FOUNDRY_KEY }}'
+          -e SUPABASE_URL='${{ secrets.SUPABASE_URL }}'
+          -e SUPABASE_KEY='${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}'
+          foundry
 
-      - name: list image
-        run: docker image list
+      - name: Copy search results into container
+        run: docker cp ./new_links.json foundry-run:/app/new_links.json
 
-      - name: Create ingestion container
-        run: docker create --name ingestion-run ingestion:latest
+      - name: Run foundry normalization
+        run: docker start -a foundry-run
 
-      - name: Copy new_links.json into container
-        run: >-
-          docker cp ./new_links.json 
-          ingestion-run:/app/new_links.json
+      - name: Copy foundry output out of container
+        run: docker cp foundry-run:/app/foundry_output.json ./foundry_output.json
 
-      - name: Run ingestion container
-        run: docker start -a ingestion-run
-
-      - name: Copy raw_profiles.json from container
-        run: >-
-          docker cp ingestion-run:/app/raw_profiles.json
-          ./raw_profiles.json
-
-      - name: Remove ingestion container
-        run: docker rm ingestion-run
-
+      - name: Remove foundry container
+        run: docker rm foundry-run
 
       - uses: actions/upload-artifact@v4
         with:
-          name: raw_profiles
-          path: raw_profiles.json
+          name: foundry-output
+          path: ./foundry_output.json
 
-  field_extraction:
-    needs: ingestion
+
+  # Note: storage job removed. Foundry now writes directly to Supabase; comms will read from DB.
+
+  # Container 3 -> Brevo Email Automation
+  # Sends recruiter outreach emails via Brevo (SMTP/API).
+  comms:
+    needs: foundry
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: raw_profiles
-          path: .
+      - name: Build comms image
+        run: docker build -t comms -f comms/Dockerfile comms
 
-      - name: Build field extraction image
-        run: docker build -t field-extraction ./field_extraction
-
-          # FIXED: explicitly run the Rust binaries
-      - name: Run extract_contact
+      - name: Create comms container
         run: >-
-          docker run --rm -i field-extraction 
-          extract_contact < raw_profiles.json > contact_fields.json
+          docker create --name comms-run
+          -e BREVO_API_KEY='${{ secrets.BREVO_API_KEY }}'
+          -e BREVO_SENDER_EMAIL='${{ secrets.BREVO_SENDER_EMAIL }}'
+          -e BREVO_SENDER_NAME='${{ secrets.BREVO_SENDER_NAME }}'
+          -e SUPABASE_URL='${{ secrets.SUPABASE_URL }}'
+          -e SUPABASE_KEY='${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}'
+          comms
 
-      - name: Run map_fields
-        run: >-
-          docker run --rm -i field-extraction
-          map_fields < contact_fields.json > extracted_fields.json
+      - name: Run email automation
+        run: docker start -a comms-run
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: extracted_fields
-          path: .
+      - name: Copy comms tracking out of container
+        run: docker cp comms-run:/app/comms_tracking.json ./comms_tracking.json
+
+      - name: Remove comms container
+        run: docker rm comms-run
 
 
-  export:
-    needs: field_extraction
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: extracted-fields
-
-      - name: Build export image
-        run: docker build -t export ./export
-      - name: Export to Supabase
-        run: |
-          docker run --rm \
-          -v ${{ github.workspace }}:/app \
-          -e SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
-          -e SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }} \
-          export ts-node to_db.ts

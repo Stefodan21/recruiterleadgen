@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build search image
-        run: docker build --no-cache -t search -f backend/Dockerfile search
+        run: docker build --no-cache -t search -f search/Dockerfile search
      
       - name: Run search
         run: >-

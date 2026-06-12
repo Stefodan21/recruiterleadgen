@@ -1,14 +1,12 @@
-FROM node:18-slim AS build
+FROM node:20-slim
 WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci --no-audit --no-fund
-COPY . .
-RUN npm run build
 
-FROM node:18-slim AS runtime
-WORKDIR /app
-COPY --from=build /app/dist ./dist
-COPY package.json ./
-ENV NODE_ENV=production
-RUN npm prune --production || true
-CMD ["node", "dist/index.js"]
+# Copy package files and install all dependencies (including dev deps like ts-node)
+COPY package.json package-lock.json* ./
+RUN npm install --legacy-peer-deps --no-audit --no-fund
+
+# Copy source files
+COPY . .
+
+# Default command: run TypeScript entry directly using ts-node (must be installed as a dependency/devDependency)
+CMD ["npm", "run", "start"]

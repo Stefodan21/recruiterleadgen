@@ -1,5 +1,5 @@
 # Build stage
-FROM node:18-slim AS build
+FROM node:20-slim AS build
 WORKDIR /app
 
 # Copy package files and install dev dependencies to build TypeScript

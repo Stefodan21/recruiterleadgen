@@ -6,7 +6,7 @@
   "types": "dist/main.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/main.js",
+    "start": "ts-node main.ts",
     "dev": "ts-node main.ts"
   },
   "dependencies": {

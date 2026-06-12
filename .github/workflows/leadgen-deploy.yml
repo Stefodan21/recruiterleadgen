@@ -66,19 +66,10 @@ jobs:
         run: docker cp ./new_links.json foundry-run:/app/new_links.json
 
       - name: Run foundry normalization
-        run: docker start -a foundry-run
-
-      - name: Copy foundry output out of container
-        run: docker cp foundry-run:/app/foundry_output.json ./foundry_output.json
+        run: docker start -a foundry-run`
 
       - name: Remove foundry container
         run: docker rm foundry-run
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: foundry-output
-          path: ./foundry_output.json
-
 
   # Note: storage job removed. Foundry now writes directly to Supabase; comms will read from DB.
 
@@ -108,6 +99,12 @@ jobs:
 
       - name: Copy comms tracking out of container
         run: docker cp comms-run:/app/comms_tracking.json ./comms_tracking.json
+
+      - name: Upload comms tracking artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: comms-tracking
+          path: ./comms_tracking.json
 
       - name: Remove comms container
         run: docker rm comms-run

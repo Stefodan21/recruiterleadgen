@@ -1,6 +1,6 @@
 name: work-iq-cron
 
-# on:
+on:
 #   schedule:
 #     - cron: '0 * * * *' # every hour at minute 0
   workflow_dispatch:

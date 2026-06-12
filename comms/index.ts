@@ -17,7 +17,7 @@ try {
 import { run } from './email_sender';
 
 run().catch(err => {
-  console.error('Fatal error in comms:', err?.message || err);
+  console.error('Fatal error in comms:', (err as any)?.message ?? err);
   process.exit(1);
 });
 

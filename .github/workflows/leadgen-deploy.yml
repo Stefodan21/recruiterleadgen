@@ -10,73 +10,72 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  search:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
+  # search:
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 30
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Build search image
-        run: docker build --no-cache -t search -f search/Dockerfile search
+  #     - name: Build search image
+  #       run: docker build --no-cache -t search -f search/Dockerfile search
      
-      - name: Run search
-        run: >-
-          docker run --name search-run
-          -e GOOGLE_KEY='${{ secrets.GOOGLE_KEY }}'
-          -e CX_ID='${{ secrets.CX_ID }}'
-          -e S3_ACCESS_KEY_ID='${{ secrets.S3_ACCESS_KEY_ID }}'
-          -e S3_SECRET_ACCESS_KEY='${{ secrets.S3_SECRET_ACCESS_KEY }}'
-          -e S3_SEEN_BUCKET='${{ secrets.S3_SEEN_BUCKET }}'
-          search:latest
+  #     - name: Run search
+  #       run: >-
+  #         docker run --name search-run
+  #         -e GOOGLE_KEY='${{ secrets.GOOGLE_KEY }}'
+  #         -e CX_ID='${{ secrets.CX_ID }}'
+  #         -e S3_ACCESS_KEY_ID='${{ secrets.S3_ACCESS_KEY_ID }}'
+  #         -e S3_SECRET_ACCESS_KEY='${{ secrets.S3_SECRET_ACCESS_KEY }}'
+  #         -e S3_SEEN_BUCKET='${{ secrets.S3_SEEN_BUCKET }}'
+  #         search:latest
 
-      - name: Copy search results
-        run: docker cp search-run:/app/new_links.json ./new_links.json
+  #     - name: Copy search results
+  #       run: docker cp search-run:/app/new_links.json ./new_links.json
 
-      - name: Remove search container
-        run: docker rm search-run
+  #     - name: Remove search container
+  #       run: docker rm search-run
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: search-results
-          path: ./new_links.json
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: search-results
+  #         path: ./new_links.json
 
-  foundry:
-    needs: search
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: search-results
-          path: .
+  # foundry:
+  #   needs: search
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         name: search-results
+  #         path: .
 
-      - name: Build foundry image
-        run: docker build -t foundry -f iq_layers/Dockerfile iq_layers
+  #     - name: Build foundry image
+  #       run: docker build -t foundry -f iq_layers/Dockerfile iq_layers
 
-      - name: Create foundry container
-        run: >-
-          docker create --name foundry-run
-          -e AZURE_FOUNDRY_ENDPOINT='${{ secrets.AZURE_FOUNDRY_ENDPOINT }}'
-          -e AZURE_FOUNDRY_KEY='${{ secrets.AZURE_FOUNDRY_KEY }}'
-          -e SUPABASE_URL='${{ secrets.SUPABASE_URL }}'
-          -e SUPABASE_KEY='${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}'
-          foundry
+  #     - name: Create foundry container
+  #       run: >-
+  #         docker create --name foundry-run
+  #         -e AZURE_FOUNDRY_ENDPOINT='${{ secrets.AZURE_FOUNDRY_ENDPOINT }}'
+  #         -e AZURE_FOUNDRY_KEY='${{ secrets.AZURE_FOUNDRY_KEY }}'
+  #         -e SUPABASE_URL='${{ secrets.SUPABASE_URL }}'
+  #         -e SUPABASE_KEY='${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}'
+  #         foundry
 
-      - name: Copy search results into container
-        run: docker cp ./new_links.json foundry-run:/app/new_links.json
+  #     - name: Copy search results into container
+  #       run: docker cp ./new_links.json foundry-run:/app/new_links.json
 
-      - name: Run foundry normalization
-        run: docker start -a foundry-run
+  #     - name: Run foundry normalization
+  #       run: docker start -a foundry-run
 
-      - name: Remove foundry container
-        run: docker rm foundry-run
+  #     - name: Remove foundry container
+  #       run: docker rm foundry-run
 
   # Note: storage job removed. Foundry now writes directly to Supabase; comms will read from DB.
 
   # Container 3 -> Brevo Email Automation
   # Sends recruiter outreach emails via Brevo (SMTP/API).
   comms:
-    needs: foundry
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

@@ -16,6 +16,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: verify Google Custom Search access
+        env:
+          GOOGLE_KEY: ${{ secrets.GOOGLE_KEY }}
+          CX_ID: ${{ secrets.CX_ID }}
+        run: |
+          echo "Testing Google Custom Search access from CI..."
+          set -e
+          resp=$(curl -sS "https://www.googleapis.com/customsearch/v1?key=${GOOGLE_KEY}&cx=${CX_ID}&q=test") || true
+          echo "---- response (first 800 chars) ----"
+          echo "$resp" | sed -n '1,800p'
+          echo "---- end response ----"
+
       - name: Build search image
         run: docker build -t search:latest -f search/Dockerfile search
      

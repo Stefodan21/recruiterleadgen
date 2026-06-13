@@ -22,11 +22,11 @@ jobs:
       - name: Run search
         run: >-
           docker run --name search-run
-          -e GOOGLE_KEY='${{ secrets.GOOGLE_KEY }}'
-          -e CX_ID='${{ secrets.CX_ID }}'
-          -e S3_ACCESS_KEY_ID='${{ secrets.S3_ACCESS_KEY_ID }}'
-          -e S3_SECRET_ACCESS_KEY='${{ secrets.S3_SECRET_ACCESS_KEY }}'
-          -e S3_SEEN_BUCKET='${{ secrets.S3_SEEN_BUCKET }}'
+          -e GOOGLE_KEY=${{ secrets.GOOGLE_KEY }}
+          -e CX_ID=${{ secrets.CX_ID }}
+          -e S3_ACCESS_KEY_ID=${{ secrets.S3_ACCESS_KEY_ID }}
+          -e S3_SECRET_ACCESS_KEY=${{ secrets.S3_SECRET_ACCESS_KEY }}
+          -e S3_SEEN_BUCKET=${{ secrets.S3_SEEN_BUCKET }}
           search:latest
 
       - name: Copy search results
@@ -57,10 +57,10 @@ jobs:
   #     - name: Create foundry container
   #       run: >-
   #         docker create --name foundry-run
-  #         -e AZURE_FOUNDRY_ENDPOINT='${{ secrets.AZURE_FOUNDRY_ENDPOINT }}'
-  #         -e AZURE_FOUNDRY_KEY='${{ secrets.AZURE_FOUNDRY_KEY }}'
-  #         -e SUPABASE_URL='${{ secrets.SUPABASE_URL }}'
-  #         -e SUPABASE_KEY='${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}'
+  #         -e AZURE_FOUNDRY_ENDPOINT=${{ secrets.AZURE_FOUNDRY_ENDPOINT }}
+  #         -e AZURE_FOUNDRY_KEY=${{ secrets.AZURE_FOUNDRY_KEY }}
+  #         -e SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+  #         -e SUPABASE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
   #         foundry
 
   #     - name: Copy search results into container
@@ -88,11 +88,11 @@ jobs:
   #     - name: Create comms container
   #       run: >-
   #         docker create --name comms-run
-  #         -e BREVO_API_KEY='${{ secrets.BREVO_API_KEY }}'
-  #         -e BREVO_SENDER_EMAIL='${{ secrets.BREVO_SENDER_EMAIL }}'
-  #         -e BREVO_SENDER_NAME='${{ secrets.BREVO_SENDER_NAME }}'
-  #         -e SUPABASE_URL='${{ secrets.SUPABASE_URL }}'
-  #         -e SUPABASE_KEY='${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}'
+  #         -e BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
+  #         -e BREVO_SENDER_EMAIL=${{ secrets.BREVO_SENDER_EMAIL }}
+  #         -e BREVO_SENDER_NAME=${{ secrets.BREVO_SENDER_NAME }}
+  #         -e SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+  #         -e SUPABASE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
   #         comms
 
   #     - name: Run email automation

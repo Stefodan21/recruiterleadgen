@@ -96,15 +96,6 @@ jobs:
       - name: Run email automation
         run: docker start -a comms-run
 
-      - name: Copy comms tracking out of container
-        run: docker cp comms-run:/app/comms_tracking.json ./comms_tracking.json
-
-      - name: Upload comms tracking artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: comms-tracking
-          path: ./comms_tracking.json
-
       - name: Remove comms container
         run: docker rm comms-run
 

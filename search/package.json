@@ -2,7 +2,7 @@
   "name": "search",
   "version": "1.0.0",
   "scripts": {
-    "start": "ts-node --transpile-only main.ts"
+    "start": "ts-node main.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1057.0",

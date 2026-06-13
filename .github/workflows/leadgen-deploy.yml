@@ -27,7 +27,8 @@ jobs:
           -e S3_ACCESS_KEY_ID=${{secrets.S3_ACCESS_KEY_ID}} \
           -e S3_SECRET_ACCESS_KEY=${{secrets.S3_SECRET_ACCESS_KEY}} \
           -e S3_SEEN_BUCKET=${{secrets.S3_SEEN_BUCKET}} \
-          search
+          search \
+          sh -c 'echo GOOGLE_KEY=$GOOGLE_KEY && echo CX_ID=$CX_ID'
 
       - name: Copy search results
         run: docker cp search-run:/app/new_links.json ./new_links.json

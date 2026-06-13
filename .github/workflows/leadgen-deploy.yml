@@ -20,7 +20,8 @@ jobs:
         run: docker build -t search:latest -f search/Dockerfile search
      
       - name: Run search
-        run: docker run --name search-run \
+        run: |
+          docker run --name search-run \
           -e GOOGLE_KEY=${{secrets.GOOGLE_KEY}} \
           -e CX_ID=${{secrets.CX_ID}} \
           -e S3_ACCESS_KEY_ID=${{secrets.S3_ACCESS_KEY_ID}} \

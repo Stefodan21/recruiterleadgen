@@ -2,7 +2,7 @@
   "name": "search",
   "version": "1.0.0",
   "scripts": {
-    "start": "ts-node --transpile-only run-main.ts"
+    "start": "tsx run-main.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1057.0",
@@ -10,7 +10,8 @@
     "axios": "^1.6.0",
     "ts-node": "10.9.2",
     "typescript": "^5.3.0",
-    "dotenv": "^16.1.4"
+    "dotenv": "^16.1.4",
+    "tsx": "^3.12.7"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",

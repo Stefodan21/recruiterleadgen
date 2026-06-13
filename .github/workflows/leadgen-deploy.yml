@@ -40,64 +40,64 @@ jobs:
           name: search-results
           path: ./new_links.json
 
-  foundry:
-    needs: search
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: search-results
-          path: .
+  # foundry:
+  #   needs: search
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         name: search-results
+  #         path: .
 
-      - name: Build foundry image
-        run: docker build -t foundry -f iq_layers/Dockerfile iq_layers
+  #     - name: Build foundry image
+  #       run: docker build -t foundry -f iq_layers/Dockerfile iq_layers
 
-      - name: Create foundry container
-        run: >-
-          docker create --name foundry-run
-          -e AZURE_FOUNDRY_ENDPOINT='${{ secrets.AZURE_FOUNDRY_ENDPOINT }}'
-          -e AZURE_FOUNDRY_KEY='${{ secrets.AZURE_FOUNDRY_KEY }}'
-          -e SUPABASE_URL='${{ secrets.SUPABASE_URL }}'
-          -e SUPABASE_KEY='${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}'
-          foundry
+  #     - name: Create foundry container
+  #       run: >-
+  #         docker create --name foundry-run
+  #         -e AZURE_FOUNDRY_ENDPOINT='${{ secrets.AZURE_FOUNDRY_ENDPOINT }}'
+  #         -e AZURE_FOUNDRY_KEY='${{ secrets.AZURE_FOUNDRY_KEY }}'
+  #         -e SUPABASE_URL='${{ secrets.SUPABASE_URL }}'
+  #         -e SUPABASE_KEY='${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}'
+  #         foundry
 
-      - name: Copy search results into container
-        run: docker cp ./new_links.json foundry-run:/app/new_links.json
+  #     - name: Copy search results into container
+  #       run: docker cp ./new_links.json foundry-run:/app/new_links.json
 
-      - name: Run foundry normalization
-        run: docker start -a foundry-run
+  #     - name: Run foundry normalization
+  #       run: docker start -a foundry-run
 
-      - name: Remove foundry container
-        run: docker rm foundry-run
+  #     - name: Remove foundry container
+  #       run: docker rm foundry-run
 
-  # Note: storage job removed. Foundry now writes directly to Supabase; comms will read from DB.
+  # # Note: storage job removed. Foundry now writes directly to Supabase; comms will read from DB.
 
-  # Container 3 -> Brevo Email Automation
-  # Sends recruiter outreach emails via Brevo (SMTP/API).
-  comms:
-    needs: foundry
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+  # # Container 3 -> Brevo Email Automation
+  # # Sends recruiter outreach emails via Brevo (SMTP/API).
+  # comms:
+  #   needs: foundry
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Build comms image
-        run: docker build -t comms -f comms/Dockerfile comms
+  #     - name: Build comms image
+  #       run: docker build -t comms -f comms/Dockerfile comms
 
-      - name: Create comms container
-        run: >-
-          docker create --name comms-run
-          -e BREVO_API_KEY='${{ secrets.BREVO_API_KEY }}'
-          -e BREVO_SENDER_EMAIL='${{ secrets.BREVO_SENDER_EMAIL }}'
-          -e BREVO_SENDER_NAME='${{ secrets.BREVO_SENDER_NAME }}'
-          -e SUPABASE_URL='${{ secrets.SUPABASE_URL }}'
-          -e SUPABASE_KEY='${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}'
-          comms
+  #     - name: Create comms container
+  #       run: >-
+  #         docker create --name comms-run
+  #         -e BREVO_API_KEY='${{ secrets.BREVO_API_KEY }}'
+  #         -e BREVO_SENDER_EMAIL='${{ secrets.BREVO_SENDER_EMAIL }}'
+  #         -e BREVO_SENDER_NAME='${{ secrets.BREVO_SENDER_NAME }}'
+  #         -e SUPABASE_URL='${{ secrets.SUPABASE_URL }}'
+  #         -e SUPABASE_KEY='${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}'
+  #         comms
 
-      - name: Run email automation
-        run: docker start -a comms-run
+  #     - name: Run email automation
+  #       run: docker start -a comms-run
 
-      - name: Remove comms container
-        run: docker rm comms-run
+  #     - name: Remove comms container
+  #       run: docker rm comms-run
 
 

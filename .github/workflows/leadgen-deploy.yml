@@ -71,10 +71,10 @@ jobs:
       - name: Remove foundry container
         run: docker rm foundry-run
 
-  Note: storage job removed. Foundry now writes directly to Supabase; comms will read from DB.
+  # Note: storage job removed. Foundry now writes directly to Supabase; comms will read from DB.
 
-  Container 3 -> Brevo Email Automation
-  Sends recruiter outreach emails via Brevo (SMTP/API).
+  # Container 3 -> Brevo Email Automation
+  # Sends recruiter outreach emails via Brevo (SMTP/API).
   comms:
     runs-on: ubuntu-latest
     steps:
